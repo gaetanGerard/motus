@@ -142,11 +142,10 @@ const compareWords = (word1, word2) => {
         if(playerLetter === randLetter) {
             wordChilrend[i].classList.add('correct');
             usedLetters.add(playerLetter);
-
             /*
             *
             * A cet étape il faut récupérer les lettre correctement placer et les afficher dans l'html du deuxième essai
-            *
+            * probablement créer une variable global pour envoyer les lettres à la fonction wordRowLayout
             *
             */
         } else if (randWord.includes(playerLetter)) {
