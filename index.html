@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Motus</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+    <link rel="stylesheet" href="./style.css">
+</head>
+<body>
+    <div id="app">
+        <nav class="navbar" >
+            <div class="container-fluid">
+                <span class="navbar-brand mb-0 h1" style="color:white;">Motus</span>
+                <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal">
+                    <img src="./resources/img/icons/gear.svg" alt="Paramètre" title="Paramètre" />
+                </button>
+            </div>
+        </nav>
+
+        <div class="container-fluid">
+            <div class="container">
+                <div class="board">
+                </div>
+            </div>
+            <div class="container">
+                <div class="keyboard">
+                    <div class="my-2 text-center">
+                        <button class="col btn btn-outline-light keyboard-key" id="key-A" value="A" data-letter="A">A</button>
+                        <button class="col btn btn-outline-light keyboard-key" id="key-Z"value="Z" data-letter="Z">Z</button>
+                        <button class="col btn btn-outline-light keyboard-key" id="key-E"value="E" data-letter="E">E</button>
+                        <button class="col btn btn-outline-light keyboard-key" id="key-R"value="R" data-letter="R">R</button>
+                        <button class="col btn btn-outline-light keyboard-key" id="key-T"value="T" data-letter="T">T</button>
+                        <button class="col btn btn-outline-light keyboard-key" id="key-Y"value="Y" data-letter="Y">Y</button>
+                        <button class="col btn btn-outline-light keyboard-key" id="key-U"value="U" data-letter="U">U</button>
+                        <button class="col btn btn-outline-light keyboard-key" id="key-I"value="I" data-letter="I">I</button>
+                        <button class="col btn btn-outline-light keyboard-key" id="key-O"value="O" data-letter="O">O</button>
+                        <button class="col btn btn-outline-light keyboard-key" id="key-P"value="P" data-letter="P">P</button>
+                    </div>
+                    <div class="my-2 text-center">
+                        <button class="col btn btn-outline-light keyboard-key" id="key-Q" value="Q" data-letter="Q">Q</button>
+                        <button class="col btn btn-outline-light keyboard-key" id="key-S" value="S" data-letter="S">S</button>
+                        <button class="col btn btn-outline-light keyboard-key" id="key-D" value="D" data-letter="D">D</button>
+                        <button class="col btn btn-outline-light keyboard-key" id="key-F" value="F" data-letter="F">F</button>
+                        <button class="col btn btn-outline-light keyboard-key" id="key-G" value="G" data-letter="G">G</button>
+                        <button class="col btn btn-outline-light keyboard-key" id="key-H" value="H" data-letter="H">H</button>
+                        <button class="col btn btn-outline-light keyboard-key" id="key-J" value="J" data-letter="J">J</button>
+                        <button class="col btn btn-outline-light keyboard-key" id="key-K" value="K" data-letter="K">K</button>
+                        <button class="col btn btn-outline-light keyboard-key" id="key-L" value="L" data-letter="L">L</button>
+                    </div>
+                    <div class="my-2 text-center">
+                        <button class="col btn btn-outline-light keyboard-key" id="key-M" value="M" data-letter="M">M</button>
+                        <button class="col btn btn-outline-light keyboard-key" id="key-W" value="W" data-letter="W">W</button>
+                        <button class="col btn btn-outline-light keyboard-key" id="key-X" value="X" data-letter="X">X</button>
+                        <button class="col btn btn-outline-light keyboard-key" id="key-C" value="C" data-letter="C">C</button>
+                        <button class="col btn btn-outline-light keyboard-key" id="key-V" value="V" data-letter="V">V</button>
+                        <button class="col btn btn-outline-light keyboard-key" id="key-B" value="B" data-letter="B">B</button>
+                        <button class="col btn btn-outline-light keyboard-key" id="key-N" value="N" data-letter="N">N</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+
+        <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+              <div class="modal-content">
+                <div class="modal-header">
+                  <h1 class="modal-title fs-5" id="exampleModalLabel">Paramètre</h1>
+                  <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div id="difficulty-container">
+                        <label for="difficulty-choice" class="form-label">Choisissez une difficulté</label>
+                        <select class="form-select" id="difficulty-choice" aria-label="Default select example">
+                            <option value="1">Facile</option>
+                            <option value="2" selected>Normal</option>
+                            <option value="3">Difficile</option>
+                        </select>
+                        <p><small><em class="difficulty-message"></em></small></p>
+                    </div>
+                    <div id="game-mode-container">
+                        <label for="game-mode-choice" class="form-label">Choisissez un mode de jeu</label>
+                        <select class="form-select" id="game-mode-choice" aria-label="Default select example">
+                            <option value="libre">Libre</option>
+                            <option value="competitif" selected>Compétitif</option>
+                        </select>
+                        <p><small><em class="game-mode-message"></em></small></p>
+                    </div>
+                    <div id="word-length-container">
+                        <label for="word-length-choice" class="form-label">Choisissez la longueur du mot a trouver</label>
+                        <select class="form-select" id="word-length-choice" aria-label="Default select example">
+                            <option value="5" selected>5 lettres</option>
+                            <option value="6">6 lettres</option>
+                            <option value="7">7 lettres</option>
+                            <option value="8">8 lettres</option>
+                            <option value="9">9 lettres</option>
+                        </select>
+                        <p><small><em class="word-length-message"></em></small></p>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                  <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermé</button>
+                  <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Enregistré</button>
+                </div>
+              </div>
+            </div>
+          </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.min.js" integrity="sha384-BBtl+eGJRgqQAUMxJ7pMwbEyER4l1g+O15P+16Ep7Q9Q+zqX6gSbd85u4mG4QzX+" crossorigin="anonymous"></script>
+    <script type="module" src="./app.js"></script>
+</body>
+</html>

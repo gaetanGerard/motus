@@ -1,0 +1,47 @@
+{
+    "modes": {
+        "competitif": {
+            "name": "Mode compétitif",
+            "description": "En mode compétitif, vous avez 5 manches et devez trouver un mot a chaque manche la première manche ayant un mot de 5 lettre chaque manche ajoutant un mot avec une lettre de plus. Plus vous trouvez de mots, plus vous gagnez de points.",
+            "type": "mode",
+            "round": 5,
+            "time_per_round": 60,
+            "time_between_round": 5,
+            "time_before_start": 5,
+            "initial_word_length": 5
+        },
+        "libre": {
+            "name": "Mode libre",
+            "description": "En mode libre, vous avez une manche par partie et aucun score n'est calculé. Vous pouvez choisir la difficulté de la partie.",
+            "type": "mode",
+            "round": 1,
+            "initial_word_length": 5
+        }
+    },
+    "difficulty": {
+        "1": {
+            "name": "Facile",
+            "description": "Facile",
+            "type": "difficulty",
+            "attempts": 10
+        },
+        "2": {
+            "name": "Normal",
+            "description": "Normal",
+            "type": "difficulty",
+            "attempts": 8
+        },
+        "3": {
+            "name": "Difficile",
+            "description": "Difficile",
+            "type": "difficulty",
+            "attempts": 6
+        }
+    },
+    "score": {
+        "word_find": 10,
+        "letter_find_well_placed": 5,
+        "letter_find_not_well_placed": 1
+
+    }
+}

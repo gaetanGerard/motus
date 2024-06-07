@@ -83,3 +83,6 @@ Il y aura également des points bonus en fonction de la rapidité, une partie ne
 - le mots est trouvé en moins de 35% du temps imparti alors bonus de 10 point
 - le mots est trouvé en moins de 50% du temps imparti alors bonus de 5 point
 - le mots est trouvé en plus de 50% du temps imparti ou hors de la limite de temps alors pas de point bonus.
+
+
+exemple : https://motus.absolu-puzzle.com/index.php
