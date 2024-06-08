@@ -5,6 +5,9 @@ import gameRules from './gameRules.json' with { type: 'json' };
 const myModal = new bootstrap.Modal(document.getElementById('mainModal'));
 const modalHeader = document.querySelector('.modal-header');
 const modalBody = document.querySelector('.modal-body');
+const diffContainer = document.querySelector('#difficulty-container');
+const gameModeContainer = document.querySelector('#game-mode-container');
+const wordLengthContainer = document.querySelector('#word-length-container');
 const diffSelected = document.querySelector('#difficulty-choice');
 const diffMessageP = document.querySelector('.difficulty-message');
 const modeSelected = document.querySelector('#game-mode-choice');
@@ -12,6 +15,7 @@ const modeMessageP = document.querySelector('.game-mode-message');
 const wordLengthSelected = document.querySelector('#word-length-choice');
 const wordLengthMessageP = document.querySelector('.word-length-message');
 const btnWithBigThingsToDo = document.querySelector('#btn-with-big-things-to-do');
+const settingsBtn = document.querySelector('.settings-btn');
 const board = document.querySelector('.board');
 const keyboardKey = document.querySelectorAll('.keyboard-key');
 const modalMessage = document.createElement('div');
@@ -20,12 +24,46 @@ let numberOfKeyPushed = 0;
 let playerWord = '';
 let currentWordLength = 0;
 let totalPossibleAttemps = 0;
-let currentGameMode = '';
 let currentAttemp = 1;
 let currentRound = 1;
 let totalRounds = 0;
-let result = {};
 let correctLetters = {};
+let score = 0;
+let correctLettersPerAttempt = [];
+let wrongLettersPerAttempt = [];
+let scorePerRound = [];
+let startTime = 0;
+let elapsedTime = 0;
+let totalElapsedTime = 0;
+const totalAllowedTime = 300;
+
+if (!localStorage.getItem('leaderboard')) {
+    const initialLeaderboard = [
+        { playerPseudo: 'Bidule', bestScore: 100 },
+        { playerPseudo: 'Machin', bestScore: 150 },
+        { playerPseudo: 'Truc', bestScore: 80 },
+        { playerPseudo: 'Bizarre', bestScore: 200 },
+        { playerPseudo: 'Génial', bestScore: 120 }
+    ];
+    localStorage.setItem('leaderboard', JSON.stringify(initialLeaderboard));
+}
+
+const startTimer = () => {
+    startTime = Date.now();
+};
+
+const stopTimer = () => {
+    elapsedTime = (Date.now() - startTime) / 1000;
+    totalElapsedTime += elapsedTime;
+};
+
+const calculateFinalScoreWithBonus = () => {
+    const timeUsedPercentage = totalElapsedTime / totalAllowedTime;
+    const remainingTimePercentage = 1 - timeUsedPercentage;
+    const bonusScore = score * remainingTimePercentage;
+    const newScore = bonusScore + score;
+    score = Math.round(newScore);
+};
 
 // Sélectionner un mot aléatoire
 const randomWord = (wordLength) => {
@@ -74,6 +112,12 @@ const resetLayout = () => {
     correctLetters = {};
     randWord = '';
     board.textContent = '';
+    score = 0;
+    correctLettersPerAttempt = [];
+    wrongLettersPerAttempt = [];
+    scorePerRound = [];
+    totalElapsedTime = 0;
+
 
     keyboardKey.forEach(key => {
         key.classList.remove('btn-danger');
@@ -82,10 +126,50 @@ const resetLayout = () => {
     }
     );
 
+    diffContainer.classList.remove('d-none');
+    gameModeContainer.classList.remove('d-none');
+    wordLengthContainer.classList.remove('d-none');
+
 };
+
+const prepareLayoutForNextRound = () => {
+    stopTimer();
+    modalHeader.textContent = 'Bravo !';
+    btnWithBigThingsToDo.innerHTML = 'Manche Suivante';
+    modalMessage.innerHTML = `<p style="font-style:italic;">Bravo ! Vous avez trouvé le mot !</p>`;
+    diffContainer.classList.add('d-none');
+    gameModeContainer.classList.add('d-none');
+    wordLengthContainer.classList.add('d-none');
+    const nexRoundWordLength = randWord.length === 9 ? 9 : randWord.length + 1;
+    randWord = randomWord(nexRoundWordLength);
+
+    correctLettersPerAttempt = [];
+    wrongLettersPerAttempt = [];
+    const newWordLength = randWord.length;
+    board.textContent = '';
+    numberOfKeyPushed = 0;
+    playerWord = '';
+    currentWordLength = 0;
+    currentAttemp = 1;
+    correctLetters = {};
+
+    keyboardKey.forEach(key => {
+        key.classList.remove('btn-danger');
+        key.classList.remove('btn-warning');
+        key.disabled = false;
+    }
+    );
+
+
+    wordRowLayout(newWordLength, currentAttemp);
+    myModal.show();
+    currentRound++;
+
+}
 
 // Update Settings message function
 const updateBoardSettings = () => {
+    stopTimer();
     resetLayout();
     const selectedDifficulty = gameRules.difficulty[diffSelected.value];
     const selectedMode = gameRules.modes[modeSelected.value];
@@ -122,45 +206,53 @@ const updateBoardSettings = () => {
 
 // Récupérer le bouton pousser pour la lettre
 const pushKey = (e) => {
+    if (startTime === 0) {
+        startTimer();
+    }
     const pressedKey = e.key.toUpperCase();
     const word = document.querySelector(`.current-attempt-${currentAttemp}`);
-    if(numberOfKeyPushed < randWord.length) {
-        if(Object.keys(correctLetters).length > 0) {
-            if(correctLetters[numberOfKeyPushed]) {
-                word.children[numberOfKeyPushed].children[0].textContent = correctLetters[numberOfKeyPushed];
-                playerWord += correctLetters[numberOfKeyPushed];
-                return numberOfKeyPushed++;
+    if (/^[A-Z]$/.test(pressedKey)) {
+        if(numberOfKeyPushed < randWord.length) {
+            if(Object.keys(correctLetters).length > 0) {
+                if(correctLetters[numberOfKeyPushed]) {
+                    word.children[numberOfKeyPushed].children[0].textContent = correctLetters[numberOfKeyPushed];
+                    playerWord += correctLetters[numberOfKeyPushed];
+                    return numberOfKeyPushed++;
+                }
             }
+            word.children[numberOfKeyPushed].children[0].textContent = pressedKey;
+            playerWord += word.children[numberOfKeyPushed].children[0].textContent;
+            return numberOfKeyPushed++;
         }
-        word.children[numberOfKeyPushed].children[0].textContent = pressedKey;
-        playerWord += word.children[numberOfKeyPushed].children[0].textContent;
-        return numberOfKeyPushed++;
     }
 };
-
 // Vérifier le mot
 const checkWord = (e) => {
     if(numberOfKeyPushed === randWord.length) {
+        compareWords(playerWord, randWord);
         if(playerWord === randWord.toUpperCase()) {
             // GAGNÉ : Gestion des victoires par manche
-            console.log('Manche Total : ', totalRounds);
-            console.log('Manche Actuelle : ', currentRound);
-            console.log('Bravo ! Vous avez trouvé le mot !');
-            if(currentRound < totalRounds) {
-                modalHeader.textContent = 'Bravo !';
-                btnWithBigThingsToDo.innerHTML = 'Manche Suivante';
-                modalMessage.innerHTML = `<p style="font-style:italic;">Bravo ! Vous avez trouvé le mot !</p>`;
-                myModal.show();
-                currentRound++;
-                // Je dois réinitialiser le tableau
-                // reset les boutons
-                // reset les lettres
-                // reset les tentatives
-                // conserver le mot précédemment trouver pour calculer le score total
-                // conserver le currentRound pour savoir si on est à la dernière manche ou non
-                // conserver le totalRounds pour savoir combien de manche il y a
+            let roundScore = calculateScore();
+            scorePerRound.push(roundScore);
+            score += roundScore;
+            console.log('Score de la manche:', roundScore);
+            console.log('Score total:', score);
 
+            if(currentRound < totalRounds) {
+                // GAGNÉ : Une seule manche
+                prepareLayoutForNextRound();
+                console.log(randWord);
             } else {
+                // GAGNÉ : Gagné toute les manches
+                stopTimer();
+                calculateFinalScoreWithBonus();
+                if(modeSelected.value === 'competitif') {
+                    const playerPseudo = prompt("Félicitations! Vous avez gagné. Entrez votre pseudo:");
+                    if (playerPseudo) {
+                        addScore(playerPseudo, score);
+                        displayLeaderBoard();
+                    }
+                }
                 modalHeader.textContent = 'Bravo !';
                 btnWithBigThingsToDo.innerHTML = 'Nouvelle Partie';
                 modalMessage.innerHTML = `<p style="font-style:italic;">Bravo ! Vous avez trouvé le mot !</p>`;
@@ -170,9 +262,8 @@ const checkWord = (e) => {
         } else {
             // PERDU : Gestion des essais et du Game Over
             if(currentAttemp < totalPossibleAttemps) {
-                compareWords(playerWord, randWord);
                 currentAttemp++;
-                wordRowLayout(wordLengthSelected.value, currentAttemp);
+                wordRowLayout(randWord.length, currentAttemp);
                 numberOfKeyPushed = 0;
 
             } else {
@@ -192,6 +283,9 @@ const compareWords = (word1, word2) => {
     const usedLetters = new Set();
     const randWord = word2.toUpperCase();
 
+    let correctCount = 0;
+    let wrongCount = 0;
+
     for (let i = 0; i < word1.length; i++) {
         const playerLetter = word1[i];
         const randLetter = word2[i].toUpperCase();
@@ -202,19 +296,74 @@ const compareWords = (word1, word2) => {
             usedLetters.add(playerLetter);
             correctLetters = {...correctLetters, [i]: playerLetter}
             key.classList.add('btn-danger');
+            correctCount++;
         } else if (randWord.includes(playerLetter)) {
             wordChilrend[i].classList.add('wrong-place');
             usedLetters.add(playerLetter);
             key.classList.add('btn-warning');
+            wrongCount++;
         } else {
             if (key) key.disabled = true;
         }
     }
+    correctLettersPerAttempt.push(correctCount);
+    wrongLettersPerAttempt.push(wrongCount);
+};
+
+const calculateScore = () => {
+    if (currentAttemp > totalPossibleAttemps) {
+        return 0;
+    }
+
+    let score = 0;
+    let totalCorrect = 0;
+    let totalWrong = 0;
+
+    correctLettersPerAttempt.forEach(correct => {
+        totalCorrect += correct;
+    });
+
+    wrongLettersPerAttempt.forEach(wrong => {
+        totalWrong += wrong;
+    });
+
+    if (currentAttemp === 1) {
+        score = (totalCorrect * 5) + 10;
+    } else {
+        score = (totalCorrect * 5) + (totalWrong * 1);
+        let remainingAttempts = totalPossibleAttemps - currentAttemp;
+        score -= (score / totalPossibleAttemps) * remainingAttempts;
+    }
+
+    return score;
+};
+
+const displayLeaderBoard = () => {
+    const leaderboard = JSON.parse(localStorage.getItem('leaderboard')) || [];
+    console.log('Tableau de Score:', leaderboard);
+
+    const scoreBoard = document.querySelector('#scoreBoard');
+    scoreBoard.innerHTML = '';
+
+    leaderboard.forEach(entry => {
+        const scoreEntry = document.createElement('li');
+        scoreEntry.classList.add('list-group-item');
+        scoreEntry.classList.add('list-group-flush');
+        scoreEntry.innerHTML = `<span style="font-weight:bold;" class="text">${entry.playerPseudo}:</span> <span class="score">${entry.bestScore}</span>`;
+        scoreBoard.appendChild(scoreEntry);
+    });
 };
 
 
-// Initialisation
-const initialBoardSettings = () => updateBoardSettings();
+const addScore = (playerPseudo, score) => {
+    const leaderboard = JSON.parse(localStorage.getItem('leaderboard')) || [];
+
+    leaderboard.push({ playerPseudo, bestScore: score });
+    leaderboard.sort((a, b) => b.bestScore - a.bestScore);
+    const newLeaderboard = leaderboard.slice(0, 5);
+
+    localStorage.setItem('leaderboard', JSON.stringify(newLeaderboard));
+};
 
 diffSelected.addEventListener('change', updateBoardSettings);
 modeSelected.addEventListener('change', updateBoardSettings);
@@ -224,8 +373,21 @@ btnWithBigThingsToDo.addEventListener('click', () => {
     btnWithBigThingsToDo.innerHTML = 'Commencer';
     modalMessage.textContent = '';
 });
-document.addEventListener('keydown', pushKey)
+document.addEventListener('keydown', e => {
+    if (e.keyCode === 13) {
+        myModal.hide();
+    }
+    pushKey(e);
+})
 document.addEventListener('keyup', checkWord);
+
+
+
+// Initialisation
+const initialBoardSettings = () => {
+    updateBoardSettings();
+    displayLeaderBoard();
+};
 
 // Exécution des fonctions
 initialBoardSettings();

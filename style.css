@@ -46,3 +46,30 @@ body {
 .modal-content {
     color: black;
 }
+
+.main-container {
+    height: calc(100vh - 56px);
+    position: relative;
+}
+
+.card-leaderBoard {
+    position : absolute;
+    bottom: 5%;
+    right: 5%;
+}
+
+#scoreBoard  {
+    padding-left: 0 !important;
+}
+
+#scoreBoard li {
+    display: grid;
+    grid-template-columns: auto auto;
+    grid-gap: 5px;
+    justify-content: stretch;
+    padding: 10px;
+}
+
+#scoreBoard li span.score {
+    justify-self: end;
+}

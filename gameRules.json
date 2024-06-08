@@ -37,11 +37,5 @@
             "type": "difficulty",
             "attempts": 6
         }
-    },
-    "score": {
-        "word_find": 10,
-        "letter_find_well_placed": 5,
-        "letter_find_not_well_placed": 1
-
     }
 }
