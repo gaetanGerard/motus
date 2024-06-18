@@ -1,4 +1,3 @@
-import data from './words.json' with { type: 'json' };
 import gameRules from './gameRules.json' with { type: 'json' };
 
 // retrieve html elements
