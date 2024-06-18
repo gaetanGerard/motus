@@ -15,7 +15,6 @@ const modeMessageP = document.querySelector('.game-mode-message');
 const wordLengthSelected = document.querySelector('#word-length-choice');
 const wordLengthMessageP = document.querySelector('.word-length-message');
 const btnWithBigThingsToDo = document.querySelector('#btn-with-big-things-to-do');
-const settingsBtn = document.querySelector('.settings-btn');
 const board = document.querySelector('.board');
 const keyboardKey = document.querySelectorAll('.keyboard-key');
 const modalMessage = document.createElement('div');
@@ -36,6 +35,7 @@ let startTime = 0;
 let elapsedTime = 0;
 let totalElapsedTime = 0;
 const totalAllowedTime = 300;
+let randWord = ''
 
 if (!localStorage.getItem('leaderboard')) {
     const initialLeaderboard = [
@@ -66,12 +66,34 @@ const calculateFinalScoreWithBonus = () => {
 };
 
 // Sélectionner un mot aléatoire
-const randomWord = (wordLength) => {
-    const words = data[wordLength].filter(word => word.length === parseInt(wordLength));
-    return words[Math.floor(Math.random() * words.length)];
+const randomWord = async (wordLength) => {
+    try {
+        const response = await fetch(`https://trouve-mot.fr/api/size/${wordLength}`);
+        const words = await response.json();
+        return words;
+    } catch (error) {
+        console.error('Error:', error);
+        return [];
+    }
 };
 
-let randWord = ''
+const handleRandomWord = async (wordSize) => {
+    const wordLength = Number(wordSize);
+    if (isNaN(wordLength) || wordLength <= 0) {
+        console.error('Longueur du mot non valide');
+        return;
+    }
+
+    const words = await randomWord(wordLength);
+    if (words.length > 0) {
+        randWord = words[0].name.toUpperCase();
+        console.log('Mot aléatoire:', randWord);
+    } else {
+        console.error('Aucun mot trouvé pour cette longueur');
+    }
+};
+
+
 
 // Mise en place du layout du jeu
 const wordRowLayout = (wordLength, currentAttemp, result) => {
@@ -141,11 +163,11 @@ const prepareLayoutForNextRound = () => {
     gameModeContainer.classList.add('d-none');
     wordLengthContainer.classList.add('d-none');
     const nexRoundWordLength = randWord.length === 9 ? 9 : randWord.length + 1;
-    randWord = randomWord(nexRoundWordLength);
+    handleRandomWord(nexRoundWordLength);
 
     correctLettersPerAttempt = [];
     wrongLettersPerAttempt = [];
-    const newWordLength = randWord.length;
+    const newWordLength = nexRoundWordLength;
     board.textContent = '';
     numberOfKeyPushed = 0;
     playerWord = '';
@@ -176,7 +198,7 @@ const updateBoardSettings = () => {
     const diffMessage = `En mode ${selectedDifficulty.name} vous avez droit à ${selectedDifficulty.attempts} essais pour trouver le mot. Bonne chance !`;
     const modeMessage = `${selectedMode.description} En difficulté ${selectedDifficulty.name} vous avez droit à ${selectedDifficulty.attempts} essais pour trouver le mot. Bonne chance !`;
     const wordLengthMessage = `Vous devez trouver un mot de ${wordLengthSelected.value} lettres.`;
-    randWord = randomWord(wordLengthSelected.value);
+    randWord = handleRandomWord(wordLengthSelected.value)
 
     diffMessageP.textContent = diffMessage;
     modeMessageP.textContent = modeMessage;
@@ -188,7 +210,7 @@ const updateBoardSettings = () => {
 
     if (newWordLength !== currentWordLength) {
         currentWordLength = newWordLength;
-        randWord = randomWord(currentWordLength);
+        randWord = handleRandomWord(currentWordLength)
     }
 
     if (newTotalPossibleAttemps !== totalPossibleAttemps) {
@@ -200,18 +222,18 @@ const updateBoardSettings = () => {
     }
 
     wordRowLayout(newWordLength, currentAttemp);
-    console.log('randWord :', randWord)
-
+    displayGameInfo();
 };
 
 // Récupérer le bouton pousser pour la lettre
 const pushKey = (e) => {
+    const regex = /^\p{L}$/u;
     if (startTime === 0) {
         startTimer();
     }
     const pressedKey = e.key.toUpperCase();
     const word = document.querySelector(`.current-attempt-${currentAttemp}`);
-    if (/^[A-Z]$/.test(pressedKey)) {
+    if (regex.test(pressedKey)) {
         if(numberOfKeyPushed < randWord.length) {
             if(Object.keys(correctLetters).length > 0) {
                 if(correctLetters[numberOfKeyPushed]) {
@@ -235,12 +257,10 @@ const checkWord = (e) => {
             let roundScore = calculateScore();
             scorePerRound.push(roundScore);
             score += roundScore;
-            console.log('Score de la manche:', roundScore);
-            console.log('Score total:', score);
-
             if(currentRound < totalRounds) {
                 // GAGNÉ : Une seule manche
                 prepareLayoutForNextRound();
+                displayGameInfo();
                 console.log(randWord);
             } else {
                 // GAGNÉ : Gagné toute les manches
@@ -250,6 +270,7 @@ const checkWord = (e) => {
                     const playerPseudo = prompt("Félicitations! Vous avez gagné. Entrez votre pseudo:");
                     if (playerPseudo) {
                         addScore(playerPseudo, score);
+                        displayGameInfo();
                         displayLeaderBoard();
                     }
                 }
@@ -264,6 +285,7 @@ const checkWord = (e) => {
             if(currentAttemp < totalPossibleAttemps) {
                 currentAttemp++;
                 wordRowLayout(randWord.length, currentAttemp);
+                displayGameInfo();
                 numberOfKeyPushed = 0;
 
             } else {
@@ -340,7 +362,6 @@ const calculateScore = () => {
 
 const displayLeaderBoard = () => {
     const leaderboard = JSON.parse(localStorage.getItem('leaderboard')) || [];
-    console.log('Tableau de Score:', leaderboard);
 
     const scoreBoard = document.querySelector('#scoreBoard');
     scoreBoard.innerHTML = '';
@@ -353,6 +374,35 @@ const displayLeaderBoard = () => {
         scoreBoard.appendChild(scoreEntry);
     });
 };
+
+const displayGameInfo = () => {
+    const gameInfo = document.querySelector('#gameInfo');
+    gameInfo.innerHTML = '';
+
+    const roundInfo = document.createElement('li');
+    roundInfo.classList.add('list-group-item');
+    roundInfo.classList.add('list-group-flush');
+    roundInfo.innerHTML = `<span style="font-weight:bold;" class="text">Manche :</span> <span class="info">${currentRound}/${totalRounds}</span>`;
+    gameInfo.appendChild(roundInfo);
+
+    const attempts = document.createElement('li');
+    attempts.classList.add('list-group-item');
+    attempts.classList.add('list-group-flush');
+    attempts.innerHTML = `<span style="font-weight:bold;" class="text">Essais :</span> <span class="info">${currentAttemp}/${totalPossibleAttemps}</span>`;
+    gameInfo.appendChild(attempts);
+
+    const difficulty = document.createElement('li');
+    difficulty.classList.add('list-group-item');
+    difficulty.classList.add('list-group-flush');
+    difficulty.innerHTML = `<span style="font-weight:bold;" class="text">Difficulté :</span> <span class="info">${gameRules.difficulty[diffSelected.value].name}</span>`;
+    gameInfo.appendChild(difficulty);
+
+    const mode = document.createElement('li');
+    mode.classList.add('list-group-item');
+    mode.classList.add('list-group-flush');
+    mode.innerHTML = `<span style="font-weight:bold;" class="text">Mode :</span> <span class="info">${gameRules.modes[modeSelected.value].name}</span>`;
+    gameInfo.appendChild(mode);
+}
 
 
 const addScore = (playerPseudo, score) => {
@@ -387,6 +437,7 @@ document.addEventListener('keyup', checkWord);
 const initialBoardSettings = () => {
     updateBoardSettings();
     displayLeaderBoard();
+    displayGameInfo();
 };
 
 // Exécution des fonctions

@@ -58,11 +58,17 @@ body {
     right: 5%;
 }
 
-#scoreBoard  {
+.card-gameInfo {
+    position : absolute;
+    bottom: 5%;
+    left: 5%;
+}
+
+#scoreBoard, #gameInfo {
     padding-left: 0 !important;
 }
 
-#scoreBoard li {
+#scoreBoard li, #gameInfo li {
     display: grid;
     grid-template-columns: auto auto;
     grid-gap: 5px;
@@ -70,6 +76,6 @@ body {
     padding: 10px;
 }
 
-#scoreBoard li span.score {
+#scoreBoard li span.score, #gameInfo li span.info {
     justify-self: end;
 }
