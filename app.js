@@ -260,7 +260,6 @@ const checkWord = (e) => {
                 // GAGNÉ : Une seule manche
                 prepareLayoutForNextRound();
                 displayGameInfo();
-                console.log(randWord);
             } else {
                 // GAGNÉ : Gagné toute les manches
                 stopTimer();
